@@ -181,7 +181,7 @@ apiClient.interceptors.response.use(
 
       try {
         // Run refresh using a standard axios instance to avoid circular 401 interception
-        console.log("REFRESHING TOKEN AT:", `${baseURL}/auth/refresh`, "WITH RT:", refreshToken)
+        console.log("Attempting token refresh...")
         const response = await axios.post(
           `${baseURL}/auth/refresh`,
           { refreshToken },
@@ -193,7 +193,7 @@ apiClient.interceptors.response.use(
           }
         )
 
-        console.log("REFRESH RESPONSE:", response.status, JSON.stringify(response.data))
+        console.log("Token refresh response status:", response.status)
         // Handle standard API envelope format
         const envelope = response.data
         const tokens = envelope.data
