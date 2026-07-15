@@ -76,17 +76,17 @@ export const DashboardShell: React.FC<DashboardShellProps> = ({
   // Shell themes and font bindings per user role
   const shellThemes = {
     client: {
-      shellBg: "bg-[#FDF8F2] text-[#3D2B1F]",
+      shellBg: "bg-[#FDF8F2] text-[#3D2B1F] theme-client",
       fontFamily: "font-body",
       mainBg: "bg-white/40",
     },
     vendor: {
-      shellBg: "bg-[#0C0D0F] text-white/90",
+      shellBg: "bg-[#0C0D0F] text-white/90 theme-vendor",
       fontFamily: "font-mono text-xs",
       mainBg: "bg-[#111315]/50",
     },
     admin: {
-      shellBg: "bg-slate-950 text-white/90",
+      shellBg: "bg-slate-950 text-white/90 theme-admin",
       fontFamily: "font-admin text-sm",
       mainBg: "bg-slate-900/30",
     },

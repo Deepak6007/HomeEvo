@@ -55,7 +55,7 @@ export default function LandingPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-cream selection:bg-orange/30 selection:text-foreground">
+    <div className="min-h-screen bg-cream selection:bg-orange/30 selection:text-foreground theme-public">
       
       {/* 1. NAVBAR */}
       <PublicNav

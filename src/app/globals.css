@@ -135,7 +135,26 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased font-body;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+/* Multi-theme Heading overrides */
+.theme-public h1, .theme-public h2, .theme-public h3, .theme-public h4, .theme-public h5, .theme-public h6 {
+  font-family: var(--font-display) !important;
+}
+
+.theme-client h1, .theme-client h2, .theme-client h3, .theme-client h4, .theme-client h5, .theme-client h6 {
+  font-family: var(--font-serif) !important;
+}
+
+.theme-vendor h1, .theme-vendor h2, .theme-vendor h3, .theme-vendor h4, .theme-vendor h5, .theme-vendor h6 {
+  font-family: var(--font-industrial) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.theme-admin h1, .theme-admin h2, .theme-admin h3, .theme-admin h4, .theme-admin h5, .theme-admin h6 {
+  font-family: var(--font-admin) !important;
 }
