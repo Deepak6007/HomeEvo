@@ -9,14 +9,17 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
+        pathname: `/${process.env.CLOUDINARY_CLOUD_NAME || '*'}/image/upload/**`,
       },
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "via.placeholder.com",
+        pathname: "/**",
       },
     ],
   },
