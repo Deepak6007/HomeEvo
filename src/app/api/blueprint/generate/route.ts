@@ -7,7 +7,36 @@ import { SYSTEM_PROMPT, buildBlueprintPrompt } from "@/lib/prompts/blueprint"
 export const runtime = 'edge'
 export const maxDuration = 60 // 60 seconds timeout
 
+// Simple in-memory rate limiting map for edge/serverless context
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function checkRateLimit(ip: string, limit: number, windowMs: number): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+
+  if (record.count >= limit) {
+    return false;
+  }
+
+  record.count += 1;
+  return true;
+}
+
 export async function POST(request: NextRequest) {
+  // Rate limiting check: max 5 blueprint generations per hour
+  const ip = request.ip || request.headers.get("x-forwarded-for") || "unknown";
+  if (!checkRateLimit(ip, 5, 3600 * 1000)) {
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Rate limit exceeded. You can generate up to 5 blueprints per hour.' 
+    }, { status: 429 });
+  }
+
   // STEP A — Authentication check
   const token = request.cookies.get("homeevo-token")?.value
 

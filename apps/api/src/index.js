@@ -55,6 +55,31 @@ const MOCK_USERS = {
   'client5@homeevo.dev': { id: 'client-uuid-005', name: 'Kavitha Patel', role: 'client', password: 'Client@123' }
 };
 
+// Rate Limiting Middleware for Auth
+const authLimiter = async (req, res, next) => {
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const key = `rate_limit:auth:${ip}`;
+  const limit = 5; // Max 5 requests
+  const windowSeconds = 900; // 15 minutes
+
+  try {
+    const count = await redisClient.incr(key);
+    if (count === 1) {
+      await redisClient.expire(key, windowSeconds);
+    }
+    if (count > limit) {
+      return res.status(429).json({
+        success: false,
+        message: 'Too many login attempts from this IP. Please try again after 15 minutes.'
+      });
+    }
+    next();
+  } catch (err) {
+    console.error('Rate limit error, falling open:', err);
+    next();
+  }
+};
+
 // Health Check Endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -66,7 +91,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Authentication Sign In Endpoint
-app.post('/api/v1/auth/signin', (req, res) => {
+app.post('/api/v1/auth/signin', authLimiter, (req, res) => {
   const { email, password } = req.body;
   console.log(`[Mock API] Sign In Request: email=${email}`);
 
@@ -106,7 +131,7 @@ app.post('/api/v1/auth/signin', (req, res) => {
 });
 
 // Authentication Sign Up Endpoint
-app.post('/api/v1/auth/signup', (req, res) => {
+app.post('/api/v1/auth/signup', authLimiter, (req, res) => {
   const { email, password, name, role } = req.body;
   console.log(`[Mock API] Sign Up Request: email=${email}, name=${name}, role=${role}`);
 
