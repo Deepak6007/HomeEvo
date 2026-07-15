@@ -141,7 +141,6 @@ model User {
 
   @@index([role])
   @@index([status])
-  @@index([email])
   @@map("users")
 }
 
@@ -189,6 +188,7 @@ model VendorProfile {
   @@index([category])
   @@index([isVerified])
   @@index([isAvailable])
+  @@index([verifiedByAdminId])
   @@map("vendor_profiles")
 }
 
@@ -298,7 +298,9 @@ model Payment {
 
   @@index([projectId])
   @@index([milestoneId])
+  @@index([orderId])
   @@index([payerId])
+  @@index([payeeId])
   @@index([status])
   @@map("payments")
 }
@@ -376,6 +378,7 @@ model OrderItem {
   product Product @relation(fields: [productId], references: [id])
 
   @@index([orderId])
+  @@index([productId])
   @@map("order_items")
 }
 
@@ -400,6 +403,8 @@ model Review {
 
   @@index([vendorId])
   @@index([projectId])
+  @@index([reviewerId])
+  @@index([vendorProfileId])
   @@map("reviews")
 }
 
@@ -460,6 +465,7 @@ model SitePhoto {
   uploadedBy User    @relation(fields: [uploadedById], references: [id])
 
   @@index([projectId])
+  @@index([uploadedById])
   @@map("site_photos")
 }
 
@@ -501,5 +507,8 @@ model Complaint {
 
   @@index([status])
   @@index([priority])
+  @@index([projectId])
+  @@index([filedById])
+  @@index([againstUserId])
   @@map("complaints")
 }
