@@ -10,7 +10,7 @@ const port = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || 'homeevo_local_dev_jwt_secret_change_in_production';
 
 // Initialize Redis client for webhook idempotency checks
-const isSecureRedis = process.env.REDIS_URL && process.env.REDIS_URL.startsWith('rediss:');
+const isSecureRedis = process.env.REDIS_URL && (process.env.REDIS_URL.startsWith('rediss:') || process.env.REDIS_URL.includes('upstash.io'));
 const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
   socket: {
