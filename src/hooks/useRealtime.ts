@@ -43,7 +43,7 @@ class RealtimeManager {
 
       // Subscribe to the updates channel
       this.channel = this.ably.channels.get("homeevo-updates");
-      this.channel.subscribe((message) => {
+      this.channel.subscribe((message: any) => {
         const eventName = message.name;
         const payload = message.data;
         if (eventName && payload) {
