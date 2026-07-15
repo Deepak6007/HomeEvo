@@ -6,6 +6,13 @@ function formatINR(num: number): string {
   }).format(num);
 }
 
+function sanitizeDescription(desc: string): string {
+  return desc
+    .replace(/(system prompt|ignore previous|ignore instructions|ignore rules|instead|override|you must|respond only with|act as)/gi, "")
+    .replace(/[{}<>\[\]]/g, "") // strip JSON and bracket structures
+    .trim();
+}
+
 export function buildBlueprintPrompt(req: BlueprintRequest): string {
   const jsonSchemaText = `{
   "floorPlan": {
@@ -61,10 +68,12 @@ export function buildBlueprintPrompt(req: BlueprintRequest): string {
   ]
 }`;
 
+  const sanitizedDesc = sanitizeDescription(req.description);
+
   return `Generate a detailed home construction blueprint for the following project in Andhra Pradesh, India.
 
 PROJECT DETAILS:
-- Description: ${req.description}
+- Description: ${sanitizedDesc}
 - Land Size: ${req.landSize} sq ft
 - Number of Floors: ${req.floors}
 - Architectural Style: ${req.style}
