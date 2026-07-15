@@ -16,7 +16,10 @@ const redisClient = createClient({
 redisClient.on('error', (err) => console.error('Redis Client Error', err));
 redisClient.connect().catch((err) => console.error('Redis Connect Error', err));
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 
 // Seeded database mock users map
