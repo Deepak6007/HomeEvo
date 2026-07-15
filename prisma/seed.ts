@@ -5,6 +5,11 @@ import process from 'process'
 const prisma = new PrismaClient()
 
 async function main() {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('❌ CRITICAL: Database seeding is blocked in production environments to prevent data loss.')
+    process.exit(1)
+  }
+
   console.log('Cleaning existing database data...')
   await prisma.notification.deleteMany()
   await prisma.review.deleteMany()
