@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from "next/server"
 import { jwtVerify } from "jose"
 import { db } from "@/lib/db"
+import { z } from "zod"
+import { BlueprintRequestSchema } from "@/lib/validators/blueprint"
+
+const BlueprintSaveSchema = z.object({
+  formData: BlueprintRequestSchema,
+  blueprintData: z.object({
+    floorPlan: z.object({
+      rooms: z.array(z.any()),
+      totalArea: z.number(),
+      floors: z.number()
+    }),
+    costEstimate: z.object({
+      items: z.array(z.any()),
+      subtotal: z.number(),
+      contingency: z.number(),
+      grandTotal: z.number()
+    }),
+    materialsList: z.array(z.any()),
+    timeline: z.object({
+      totalWeeks: z.number(),
+      phases: z.array(z.any())
+    }),
+    recommendations: z.array(z.string())
+  })
+})
 
 export async function POST(request: NextRequest) {
   // Check auth cookie
@@ -43,10 +68,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid JSON request body" }, { status: 400 })
   }
 
-  const { blueprintData, formData } = body
-  if (!blueprintData || !formData) {
-    return NextResponse.json({ success: false, error: "Missing blueprintData or formData" }, { status: 400 })
+  const parsed = BlueprintSaveSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ 
+      success: false, 
+      error: "Invalid request payload structure", 
+      errors: parsed.error.flatten().fieldErrors 
+    }, { status: 400 })
   }
+
+  const { blueprintData, formData } = parsed.data
 
   try {
     // Save to database
