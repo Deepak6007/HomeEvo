@@ -4,7 +4,7 @@ import * as Ably from "ably";
 
 class RealtimeManager {
   private ably: Ably.Realtime | null = null;
-  private channel: Ably.RealtimeChannel | null = null;
+  private channel: any = null;
   private listeners: Map<string, Set<(data: any) => void>> = new Map();
   private token: string | null = null;
 
