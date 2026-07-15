@@ -5,9 +5,9 @@ services:
     image: postgres:15-alpine
     container_name: homeevo_postgres
     environment:
-      POSTGRES_USER: homeevo
-      POSTGRES_PASSWORD: homeevo_dev_password
-      POSTGRES_DB: homeevo_db
+      POSTGRES_USER: ${POSTGRES_USER:-homeevo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-homeevo_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-homeevo_db}
     ports:
       - "5433:5432"
     volumes:
@@ -36,8 +36,8 @@ services:
     image: dpage/pgadmin4:latest
     container_name: homeevo_pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@homeevo.dev
-      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@homeevo.dev}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin123}
     ports:
       - "5050:80"
     depends_on:
@@ -57,9 +57,9 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=4000
-      - DATABASE_URL=postgresql://homeevo:homeevo_dev_password@postgres:5432/homeevo_db?schema=public
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=homeevo_local_dev_jwt_secret_change_in_production
+      - DATABASE_URL=${DATABASE_URL:-postgresql://homeevo:homeevo_dev_password@postgres:5432/homeevo_db?schema=public}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - JWT_SECRET=${JWT_SECRET:-homeevo_local_dev_jwt_secret_change_in_production}
     depends_on:
       postgres:
         condition: service_healthy
