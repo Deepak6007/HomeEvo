@@ -1,4 +1,4 @@
-// SERVER ONLY — never import in client components
+import 'server-only'
 import OpenAI from 'openai'
 
 export const hfClient = new OpenAI({
