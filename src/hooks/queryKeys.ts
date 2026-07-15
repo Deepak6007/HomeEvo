@@ -1,0 +1,71 @@
+export const queryKeys = {
+  projects: {
+    all: ['projects'] as const,
+    lists: () => [...queryKeys.projects.all, 'list'] as const,
+    list: (filters?: any) => [...queryKeys.projects.lists(), filters] as const,
+    details: () => [...queryKeys.projects.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.projects.details(), id] as const,
+    timelines: () => [...queryKeys.projects.all, 'timeline'] as const,
+    timeline: (id: string) => [...queryKeys.projects.timelines(), id] as const,
+  },
+  vendors: {
+    all: ['vendors'] as const,
+    lists: () => [...queryKeys.vendors.all, 'list'] as const,
+    list: (filters?: any, page?: number) => [...queryKeys.vendors.lists(), { filters, page }] as const,
+    details: () => [...queryKeys.vendors.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.vendors.details(), id] as const,
+    reviews: (vendorId: string) => [...queryKeys.vendors.all, 'reviews', vendorId] as const,
+    bids: (vendorId: string, projectId: string) => [...queryKeys.vendors.all, 'bids', { vendorId, projectId }] as const,
+  },
+  escrow: {
+    all: ['escrow'] as const,
+    balance: () => [...queryKeys.escrow.all, 'balance'] as const,
+    history: (filters?: any) => [...queryKeys.escrow.all, 'history', filters] as const,
+  },
+  materials: {
+    all: ['materials'] as const,
+    lists: () => [...queryKeys.materials.all, 'list'] as const,
+    list: (filters?: any) => [...queryKeys.materials.lists(), filters] as const,
+    details: () => [...queryKeys.materials.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.materials.details(), id] as const,
+    cart: () => [...queryKeys.materials.all, 'cart'] as const,
+  },
+  leads: {
+    all: ['leads'] as const,
+    lists: () => [...queryKeys.leads.all, 'list'] as const,
+    list: (filters?: any) => [...queryKeys.leads.lists(), filters] as const,
+    details: () => [...queryKeys.leads.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.leads.details(), id] as const,
+  },
+  vendorBids: {
+    all: ['vendorBids'] as const,
+    lists: () => [...queryKeys.vendorBids.all, 'list'] as const,
+    list: (filters?: any) => [...queryKeys.vendorBids.lists(), filters] as const,
+    details: () => [...queryKeys.vendorBids.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.vendorBids.details(), id] as const,
+  },
+  vendorProjects: {
+    all: ['vendorProjects'] as const,
+    lists: () => [...queryKeys.vendorProjects.all, 'list'] as const,
+    list: (filters?: any) => [...queryKeys.vendorProjects.lists(), filters] as const,
+    details: () => [...queryKeys.vendorProjects.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.vendorProjects.details(), id] as const,
+  },
+  vendorStats: {
+    all: ['vendorStats'] as const,
+  },
+  vendorEarnings: {
+    all: ['vendorEarnings'] as const,
+  },
+  vendorProfile: {
+    all: ['vendorProfile'] as const,
+    details: () => [...queryKeys.vendorProfile.all, 'detail'] as const,
+    detail: () => [...queryKeys.vendorProfile.details()] as const,
+    reviews: (filters?: any) => [...queryKeys.vendorProfile.all, 'reviews', filters] as const,
+  },
+  messages: {
+    all: ['messages'] as const,
+    conversations: () => [...queryKeys.messages.all, 'conversations'] as const,
+    thread: (conversationId: string) => [...queryKeys.messages.all, 'thread', conversationId] as const,
+  },
+};

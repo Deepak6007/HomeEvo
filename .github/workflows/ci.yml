@@ -1,0 +1,128 @@
+name: HomeEvo CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  NEXT_PUBLIC_API_URL: "http://localhost:4000/api/v1"
+  NEXT_PUBLIC_RAZORPAY_KEY: "rzp_test_mock"
+  NEXT_PUBLIC_WS_URL: "ws://localhost:4000"
+  JWT_SECRET: "mock_jwt_secret_for_compilation_verification"
+
+jobs:
+  lint:
+    name: Lint & Typecheck Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run ESLint Checks
+        run: npm run lint
+
+      - name: Run TypeScript Compile Checks
+        run: npx tsc --noEmit
+
+  test:
+    name: Execute Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Execute Jest Unit Test Suite
+        run: npm run test
+
+  build:
+    name: Production Compile Verification
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Compile Optimized Production Build
+        run: npm run build
+
+  preview:
+    name: Deploy Vercel PR Preview
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Vercel CLI Globally
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Configuration
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Preview Bundle
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Preview Artifacts to Vercel
+        id: deploy
+        run: |
+          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "DEPLOY_URL=$DEPLOY_URL" >> $GITHUB_ENV
+          echo "::set-output name=url::$DEPLOY_URL"
+
+      - name: Comment Preview URL on Pull Request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue_number = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const deployUrl = process.env.DEPLOY_URL;
+            
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: `🚀 **Vercel Preview Deployment is ready!**\n\n- **Preview URL:** [${deployUrl}](${deployUrl})\n- **Triggered by push:** \`${context.sha.substring(0, 7)}\`\n- **Status:** Healthy`
+            });

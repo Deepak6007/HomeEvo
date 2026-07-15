@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: homeevo_postgres
+    environment:
+      POSTGRES_USER: homeevo
+      POSTGRES_PASSWORD: homeevo_dev_password
+      POSTGRES_DB: homeevo_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - homeevo_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homeevo -d homeevo_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: homeevo_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - homeevo_redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: homeevo_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@homeevo.dev
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: homeevo_api
+    command: npm run dev
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - DATABASE_URL=postgresql://homeevo:homeevo_dev_password@postgres:5432/homeevo_db?schema=public
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=homeevo_local_dev_jwt_secret_change_in_production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: homeevo_ngrok
+    ports:
+      - "4040:4040"
+    command:
+      - "http"
+      - "api:4000"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    depends_on:
+      - api
+
+volumes:
+  homeevo_postgres_data:
+  homeevo_redis_data:

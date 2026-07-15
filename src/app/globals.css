@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Syne:wght@400..800&family=Outfit:wght@100..900&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Font families */
+  --font-display: Syne, sans-serif;
+  --font-serif: Fraunces, serif;
+  --font-body: "DM Sans", sans-serif;
+  --font-industrial: "Barlow Condensed", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-admin: "Outfit", sans-serif;
+
+  /* Custom brand colors */
+  --color-orange: #E85D04;
+  --color-orange-light: rgba(232, 93, 4, 0.12);
+  --color-orange-glow: rgba(232, 93, 4, 0.22);
+  
+  --color-brown: #3D2B1F;
+  --color-brown-light: #7A5C4A;
+  --color-brown-muted: #9B8070;
+  
+  --color-cream: #FDF8F2;
+  --color-cream-warm: #F7EFE4;
+  
+  --color-dark: #0C0D0F;
+  --color-dark-2: #111315;
+  --color-dark-3: #181B1E;
+  --color-dark-4: #1E2226;
+
+  /* Map standard theme properties to variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+:root {
+  --background: #FDF8F2; /* Cream default */
+  --foreground: #3D2B1F; /* Brown default */
+  
+  --card: #FFFFFF;
+  --card-foreground: #3D2B1F;
+  
+  --popover: #FFFFFF;
+  --popover-foreground: #3D2B1F;
+  
+  --primary: #E85D04; /* Orange */
+  --primary-foreground: #FDF8F2;
+  
+  --secondary: #3D2B1F; /* Brown */
+  --secondary-foreground: #FDF8F2;
+  
+  --muted: #9B8070; /* Brown muted */
+  --muted-foreground: #5C4A3E;
+  
+  --accent: #E85D04;
+  --accent-foreground: #FFFFFF;
+  
+  --destructive: #EF4444;
+  --destructive-foreground: #F9FAF5;
+  
+  --border: #EAE3DC;
+  --input: #EAE3DC;
+  --ring: #E85D04;
+  
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: #0C0D0F; /* Dark default */
+  --foreground: #F9FAF5;
+  
+  --card: #111315; /* Dark 2 */
+  --card-foreground: #F9FAF5;
+  
+  --popover: #111315;
+  --popover-foreground: #F9FAF5;
+  
+  --primary: #E85D04; /* Orange */
+  --primary-foreground: #F9FAF5;
+  
+  --secondary: #181B1E; /* Dark 3 */
+  --secondary-foreground: #F9FAF5;
+  
+  --muted: #1E2226; /* Dark 4 */
+  --muted-foreground: #A1A1A5;
+  
+  --accent: #E85D04;
+  --accent-foreground: #F9FAF5;
+  
+  --destructive: #EF4444;
+  --destructive-foreground: #F9FAF5;
+  
+  --border: #1E2226;
+  --input: #1E2226;
+  --ring: #E85D04;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
