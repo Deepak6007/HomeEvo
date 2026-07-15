@@ -143,6 +143,36 @@ app.post('/api/v1/auth/signup', (req, res) => {
   });
 });
 
+// Authentication Token Refresh Endpoint
+app.post('/api/v1/auth/refresh', (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return res.status(401).json({ success: false, message: 'Refresh token is required' });
+  }
+
+  try {
+    const payload = jwt.verify(refreshToken, JWT_SECRET);
+    const tokenPayload = {
+      sub: payload.sub,
+      role: payload.role
+    };
+
+    const newAccessToken = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '15m' });
+    const newRefreshToken = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '30d' });
+
+    res.json({
+      success: true,
+      message: 'Token refreshed successfully',
+      data: {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken
+      }
+    });
+  } catch (err) {
+    return res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
+  }
+});
+
 // Secure payments webhook endpoint with signature verification & idempotency
 app.post('/api/v1/payments/webhook', async (req, res) => {
   console.log('Received Razorpay Webhook Event:', req.body);
