@@ -1,11 +1,20 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { createClient } = require('redis');
 
 const app = express();
 const port = process.env.PORT || 4000;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'homeevo_local_dev_jwt_secret_change_in_production';
+
+// Initialize Redis client for webhook idempotency checks
+const redisClient = createClient({
+  url: process.env.REDIS_URL || 'redis://localhost:6379'
+});
+redisClient.on('error', (err) => console.error('Redis Client Error', err));
+redisClient.connect().catch((err) => console.error('Redis Connect Error', err));
 
 app.use(cors());
 app.use(express.json());
@@ -134,10 +143,54 @@ app.post('/api/v1/auth/signup', (req, res) => {
   });
 });
 
-// Mock payments webhook endpoint for Razorpay testing
-app.post('/api/v1/payments/webhook', (req, res) => {
+// Secure payments webhook endpoint with signature verification & idempotency
+app.post('/api/v1/payments/webhook', async (req, res) => {
   console.log('Received Razorpay Webhook Event:', req.body);
-  res.json({ success: true, message: 'Webhook received successfully' });
+
+  const signature = req.headers['x-razorpay-signature'];
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || 'your_webhook_secret';
+
+  // 1. Signature Verification
+  if (!signature) {
+    return res.status(400).json({ success: false, message: 'Missing Razorpay signature' });
+  }
+
+  const expectedSignature = crypto
+    .createHmac('sha256', webhookSecret)
+    .update(JSON.stringify(req.body))
+    .digest('hex');
+
+  if (signature !== expectedSignature) {
+    return res.status(400).json({ success: false, message: 'Invalid webhook signature' });
+  }
+
+  // 2. Idempotency Check (Deduplication via Redis)
+  const eventId = req.headers['x-razorpay-event-id'] || req.body.id;
+  if (!eventId) {
+    return res.status(400).json({ success: false, message: 'Missing webhook event ID' });
+  }
+
+  try {
+    const isNewEvent = await redisClient.set(
+      `webhook_event:${eventId}`,
+      'processed',
+      {
+        NX: true,
+        EX: 86400 // Expire in 24 hours
+      }
+    );
+
+    if (!isNewEvent) {
+      console.warn(`[Webhook] Duplicate event ignored: ${eventId}`);
+      return res.status(200).json({ success: true, message: 'Duplicate event skipped' });
+    }
+  } catch (err) {
+    console.error('[Webhook] Redis deduplication check failed:', err);
+    return res.status(500).json({ success: false, message: 'Failed to verify event uniqueness' });
+  }
+
+  // Proceed with processing payment details (milestone release, etc.)
+  res.json({ success: true, message: 'Webhook verified and processed successfully' });
 });
 
 app.listen(port, () => {
