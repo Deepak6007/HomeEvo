@@ -1,29 +1,28 @@
 import * as React from "react"
 import "@/env"
-import { Syne, DM_Sans, Fraunces, Barlow_Condensed, JetBrains_Mono, Outfit } from "next/font/google"
+import { Plus_Jakarta_Sans, Inter, Lora, Space_Grotesk, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 
-const syne = Syne({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
 })
 
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
 })
 
-const fraunces = Fraunces({
+const lora = Lora({
   subsets: ["latin"],
   variable: "--font-serif",
   display: "swap",
 })
 
-const barlowCondensed = Barlow_Condensed({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   variable: "--font-industrial",
   display: "swap",
 })
@@ -34,7 +33,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 })
 
-const outfit = Outfit({
+const adminFont = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-admin",
   display: "swap",
@@ -51,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${syne.variable} ${dmSans.variable} ${fraunces.variable} ${barlowCondensed.variable} ${jetbrainsMono.variable} ${outfit.variable}`}
+      className={`${plusJakartaSans.variable} ${inter.variable} ${lora.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} ${adminFont.variable}`}
     >
       <body className="bg-cream text-foreground antialiased min-h-screen selection:bg-orange/30 selection:text-foreground">
         <Providers>
