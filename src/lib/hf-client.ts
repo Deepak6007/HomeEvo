@@ -1,9 +1,11 @@
 import 'server-only'
 import OpenAI from 'openai'
 
+const hfToken = process.env.HF_TOKEN || 'build_time_placeholder';
+
 export const hfClient = new OpenAI({
   baseURL: 'https://router.huggingface.co/v1',
-  apiKey: process.env.HF_TOKEN || '',
+  apiKey: hfToken,
 })
 
 export const HF_MODEL = process.env.HF_MODEL || 'Qwen/Qwen2.5-72B-Instruct'
