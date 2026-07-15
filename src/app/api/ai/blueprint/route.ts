@@ -1,6 +1,27 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const token = req.cookies.get("homeevo-token")?.value;
+
+  if (!token) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const secretStr = process.env.JWT_SECRET;
+    if (!secretStr) {
+      console.error("JWT_SECRET is missing in environment variables");
+      return NextResponse.json({ success: false, error: 'Server configuration error' }, { status: 500 });
+    }
+
+    const secret = new TextEncoder().encode(secretStr);
+    await jwtVerify(token, secret);
+  } catch (error) {
+    console.error("JWT validation error in ai mock blueprint endpoint:", error);
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
   const encoder = new TextEncoder();
   let data;
   try {
