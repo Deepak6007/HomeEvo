@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BlueprintRequest, BlueprintResponse } from "../lib/validators/blueprint"
+import { BlueprintRequest, BlueprintResponse, BlueprintResponseSchema } from "../lib/validators/blueprint"
 
 export function useBlueprint() {
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
@@ -62,11 +62,17 @@ export function useBlueprint() {
           const payload = line.slice(6).trim() // remove "data: " and trim
           
           if (payload === '[DONE]') {
-            // Final JSON complete — parse it
+            // Final JSON complete — parse and validate it
             try {
-              const parsed = JSON.parse(accumulated) as BlueprintResponse
-              setData(parsed)
-              setProgress(100)
+              const rawJson = JSON.parse(accumulated)
+              const parsed = BlueprintResponseSchema.safeParse(rawJson)
+              if (parsed.success) {
+                setData(parsed.data)
+                setProgress(100)
+              } else {
+                console.error("Zod validation failed for blueprint data:", parsed.error.flatten())
+                setError('Blueprint response schema validation failed. Please try again.')
+              }
             } catch (err) {
               console.error("JSON parsing error on [DONE]:", err, accumulated)
               setError('Blueprint data was corrupted during streaming. Please try again.')

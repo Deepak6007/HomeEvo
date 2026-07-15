@@ -21,47 +21,56 @@ export const BlueprintRequestSchema = z.object({
 
 export type BlueprintRequest = z.infer<typeof BlueprintRequestSchema>
 
-export type BlueprintResponse = {
-  floorPlan: {
-    rooms: Array<{
-      name: string        // e.g. "Master Bedroom", "Kitchen", "Pooja Room"
-      width: number       // in feet
-      length: number      // in feet
-      area: number        // sq ft (width × length)
-      floor: number       // 1, 2, 3 etc.
-      type: 'bedroom' | 'bathroom' | 'kitchen' | 'living' |
-            'dining' | 'utility' | 'pooja' | 'garage' | 'other'
-    }>
-    totalArea: number     // total built-up area in sq ft
-    floors: number
-  }
-  costEstimate: {
-    items: Array<{
-      category: string    // e.g. "Foundation", "Structure", "Electrical"
-      item: string        // e.g. "M25 Concrete for Foundation"
-      quantity: number
-      unit: string        // "bags", "kg", "sq ft", "points", "sets"
-      unitCost: number    // in INR
-      totalCost: number   // quantity × unitCost
-    }>
-    subtotal: number
-    contingency: number   // exactly 10% of subtotal
-    grandTotal: number    // subtotal + contingency
-  }
-  materialsList: Array<{
-    material: string      // e.g. "OPC 53 Grade Cement"
-    quantity: number
-    unit: string
-    estimatedCost: number // in INR
-    notes: string         // e.g. "Use ACC or Ultratech brand", "Buy locally in AP"
-  }>
-  timeline: {
-    totalWeeks: number
-    phases: Array<{
-      name: string        // e.g. "Foundation & Plinth"
-      weeks: number       // duration in weeks
-      description: string // what happens in this phase
-    }>
-  }
-  recommendations: string[] // practical advice for AP construction
-}
+export const BlueprintResponseSchema = z.object({
+  floorPlan: z.object({
+    rooms: z.array(
+      z.object({
+        name: z.string(),
+        width: z.number(),
+        length: z.number(),
+        area: z.number(),
+        floor: z.number(),
+        type: z.enum(['bedroom', 'bathroom', 'kitchen', 'living', 'dining', 'utility', 'pooja', 'garage', 'other'])
+      })
+    ),
+    totalArea: z.number(),
+    floors: z.number()
+  }),
+  costEstimate: z.object({
+    items: z.array(
+      z.object({
+        category: z.string(),
+        item: z.string(),
+        quantity: z.number(),
+        unit: z.string(),
+        unitCost: z.number(),
+        totalCost: z.number()
+      })
+    ),
+    subtotal: z.number(),
+    contingency: z.number(),
+    grandTotal: z.number()
+  }),
+  materialsList: z.array(
+    z.object({
+      material: z.string(),
+      quantity: z.number(),
+      unit: z.string(),
+      estimatedCost: z.number(),
+      notes: z.string()
+    })
+  ),
+  timeline: z.object({
+    totalWeeks: z.number(),
+    phases: z.array(
+      z.object({
+        name: z.string(),
+        weeks: z.number(),
+        description: z.string()
+      })
+    )
+  }),
+  recommendations: z.array(z.string())
+})
+
+export type BlueprintResponse = z.infer<typeof BlueprintResponseSchema>
