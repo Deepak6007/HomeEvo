@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { persist } from "zustand/middleware"
+import { persist, createJSONStorage } from "zustand/middleware"
 import { User } from "@/types"
 
 interface AuthTokens {
@@ -49,6 +49,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "homeevo-auth",
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
