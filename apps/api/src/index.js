@@ -10,8 +10,13 @@ const port = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || 'homeevo_local_dev_jwt_secret_change_in_production';
 
 // Initialize Redis client for webhook idempotency checks
+const isSecureRedis = process.env.REDIS_URL && process.env.REDIS_URL.startsWith('rediss:');
 const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379'
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  socket: isSecureRedis ? {
+    tls: true,
+    rejectUnauthorized: false
+  } : undefined
 });
 redisClient.on('error', (err) => console.error('Redis Client Error', err));
 redisClient.connect().catch((err) => console.error('Redis Connect Error', err));
