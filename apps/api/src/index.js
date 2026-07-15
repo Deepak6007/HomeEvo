@@ -13,10 +13,22 @@ const JWT_SECRET = process.env.JWT_SECRET || 'homeevo_local_dev_jwt_secret_chang
 const isSecureRedis = process.env.REDIS_URL && process.env.REDIS_URL.startsWith('rediss:');
 const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
-  socket: isSecureRedis ? {
-    tls: true,
-    rejectUnauthorized: false
-  } : undefined
+  socket: {
+    tls: isSecureRedis ? true : undefined,
+    rejectUnauthorized: false,
+    reconnectStrategy: (retries) => {
+      // If in production and REDIS_URL environment variable is missing, do not attempt reconnection
+      if (!process.env.REDIS_URL && process.env.NODE_ENV === 'production') {
+        return false;
+      }
+      // Stop attempting to reconnect after 5 failed connections to prevent log spam
+      if (retries > 5) {
+        console.warn('[Redis] Max reconnection attempts reached. Disabling Redis client.');
+        return false; 
+      }
+      return Math.min(retries * 200, 2000);
+    }
+  }
 });
 redisClient.on('error', (err) => console.error('Redis Client Error', err));
 redisClient.connect().catch((err) => console.error('Redis Connect Error', err));
