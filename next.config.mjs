@@ -46,6 +46,10 @@ const nextConfig = {
             value: "max-age=31536000; includeSubDomains; preload",
           },
           {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
             key: "Content-Security-Policy",
             value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://res.cloudinary.com https://images.unsplash.com https://via.placeholder.com; connect-src 'self' http://localhost:4000 ws://localhost:4000 https://api.ably.com https://checkout.razorpay.com wss://*.ably-realtime.com; font-src 'self' https://fonts.gstatic.com; frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com; upgrade-insecure-requests;",
           },
