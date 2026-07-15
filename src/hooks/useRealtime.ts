@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
+import * as Ably from "ably";
 
 class RealtimeManager {
-  private socket: WebSocket | null = null;
+  private ably: Ably.Realtime | null = null;
+  private channel: Ably.RealtimeChannel | null = null;
   private listeners: Map<string, Set<(data: any) => void>> = new Map();
-  private reconnectTimeout: NodeJS.Timeout | null = null;
   private token: string | null = null;
 
   constructor() {
@@ -20,55 +21,48 @@ class RealtimeManager {
   }
 
   public connect(token: string) {
-    if (
-      this.token === token &&
-      this.socket &&
-      (this.socket.readyState === WebSocket.CONNECTING || this.socket.readyState === WebSocket.OPEN)
-    ) {
+    if (this.token === token && this.ably) {
       return;
     }
 
     this.disconnect();
     this.token = token;
 
-    const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:4000"}?token=${token}`;
+    const ablyKey = process.env.NEXT_PUBLIC_ABLY_KEY;
+    if (!ablyKey) {
+      console.warn("[Realtime] NEXT_PUBLIC_ABLY_KEY is missing. Real-time updates will run in mock mode.");
+      return;
+    }
 
     try {
-      this.socket = new WebSocket(wsUrl);
+      // Connect to Ably Realtime
+      this.ably = new Ably.Realtime({
+        key: ablyKey,
+        clientId: token
+      });
 
-      this.socket.onmessage = (event) => {
-        try {
-          const payload = JSON.parse(event.data);
-          if (payload.event && payload.data) {
-            this.emit(payload.event, payload.data);
-          }
-        } catch (err) {
-          console.error("[Realtime] Failed to parse WebSocket message", err);
+      // Subscribe to the updates channel
+      this.channel = this.ably.channels.get("homeevo-updates");
+      this.channel.subscribe((message) => {
+        const eventName = message.name;
+        const payload = message.data;
+        if (eventName && payload) {
+          this.emit(eventName, payload);
         }
-      };
-
-      this.socket.onerror = () => {
-        console.warn("[Realtime] WebSocket connection error. Gracefully falling back to mock mode.");
-      };
-
-      this.socket.onclose = () => {
-        if (this.token) {
-          this.reconnectTimeout = setTimeout(() => this.connect(token), 5000);
-        }
-      };
+      });
     } catch (e) {
-      console.warn("[Realtime] Failed to initialize WebSocket client. Using mock fallback.", e);
+      console.warn("[Realtime] Failed to initialize Ably connection. Using mock fallback.", e);
     }
   }
 
   public disconnect() {
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = null;
+    if (this.channel) {
+      this.channel.unsubscribe();
+      this.channel = null;
     }
-    if (this.socket) {
-      this.socket.close();
-      this.socket = null;
+    if (this.ably) {
+      this.ably.close();
+      this.ably = null;
     }
     this.token = null;
   }
